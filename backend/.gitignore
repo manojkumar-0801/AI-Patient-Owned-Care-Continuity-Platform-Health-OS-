@@ -1,0 +1,68 @@
+# ─── Python ─────────────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+
+# ─── Virtual Environments ───────────────────────────────────────────────────
+.env
+.venv/
+venv/
+env/
+ENV/
+
+# ─── Django ─────────────────────────────────────────────────────────────────
+*.log
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+static_collected/
+
+# ─── Distribution / Packaging ───────────────────────────────────────────────
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ─── Testing ────────────────────────────────────────────────────────────────
+.pytest_cache/
+.tox/
+.nox/
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# ─── IDEs ───────────────────────────────────────────────────────────────────
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ─── OS ─────────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── Secrets ────────────────────────────────────────────────────────────────
+.env
+*.pem
+*.key
+secrets/
