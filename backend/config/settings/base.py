@@ -33,6 +33,7 @@ THIRD_PARTY_APPS = [
 ]
 
 LOCAL_APPS = [
+    'apps.core',              # Base API foundation
     'apps.accounts',          # Authentication, JWT, RBAC
     'apps.patients',          # Patient profiles, health metrics
     'apps.doctors',           # Doctor profiles, verification
@@ -144,7 +145,7 @@ REST_FRAMEWORK = {
         'user': '1000/day',
         'auth': '10/minute',       # Strict limit for login/register
     },
-    'EXCEPTION_HANDLER': 'apps.accounts.exceptions.custom_exception_handler',
+    'EXCEPTION_HANDLER': 'apps.core.exceptions.custom_exception_handler',
 }
 
 # ─── JWT Configuration ──────────────────────────────────────────────────────
