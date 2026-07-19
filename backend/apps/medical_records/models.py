@@ -49,8 +49,8 @@ class MedicalDocument(models.Model):
         blank=True
     )
 
-    # File storage (S3)
-    file_s3_key       = models.CharField(max_length=1000)
+    # File storage (Local MVP)
+    file              = models.FileField(upload_to='medical_documents/', null=True, blank=True)
     file_original_name = models.CharField(max_length=500, blank=True)
     file_type         = models.CharField(max_length=10, choices=[('PDF','PDF'),('JPG','JPG'),('PNG','PNG'),('HEIC','HEIC')], blank=True)
     file_size_bytes   = models.BigIntegerField(default=0)

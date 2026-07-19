@@ -2,7 +2,6 @@
 Custom User Manager for Health OS.
 Handles creation of users and superusers with email as the primary identifier.
 """
-import uuid
 from django.contrib.auth.models import BaseUserManager
 
 
@@ -32,10 +31,12 @@ class UserManager(BaseUserManager):
 
     def create_superuser(self, email, password=None, **extra_fields):
         """Create and return a superuser with all permissions."""
+        from .models import UserRole
+        
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
-        extra_fields.setdefault('role', 'ADMIN')
+        extra_fields.setdefault('role', UserRole.ADMIN)
 
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')

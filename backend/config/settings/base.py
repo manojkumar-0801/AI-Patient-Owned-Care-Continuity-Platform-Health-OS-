@@ -89,7 +89,7 @@ DATABASES = {
 }
 
 # ─── Custom User Model ──────────────────────────────────────────────────────
-AUTH_USER_MODEL = 'accounts.User'
+AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # ─── Password Validation ────────────────────────────────────────────────────
 AUTH_PASSWORD_VALIDATORS = [
