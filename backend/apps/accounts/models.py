@@ -16,9 +16,11 @@ from .managers import UserManager
 
 # ─── Role Choices ────────────────────────────────────────────────────────────
 class UserRole(models.TextChoices):
-    PATIENT = 'PATIENT', _('Patient')
-    DOCTOR  = 'DOCTOR',  _('Doctor')
-    ADMIN   = 'ADMIN',   _('Admin')
+    PATIENT    = 'PATIENT',    _('Patient')
+    DOCTOR     = 'DOCTOR',     _('Doctor')
+    STAFF      = 'STAFF',      _('Hospital Staff')
+    ADMIN      = 'ADMIN',      _('Admin')
+    AI_SERVICE = 'AI_SERVICE', _('AI Service')
 
 
 class GenderChoices(models.TextChoices):
@@ -40,7 +42,7 @@ class BloodTypeChoices(models.TextChoices):
 
 
 # ─── User Model ──────────────────────────────────────────────────────────────
-class User(AbstractBaseUser, PermissionsMixin):
+class CustomUser(AbstractBaseUser, PermissionsMixin):
     """
     Custom User model for Health OS.
 
@@ -50,22 +52,19 @@ class User(AbstractBaseUser, PermissionsMixin):
     - Soft delete via deleted_at timestamp.
     """
 
-    id          = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    email       = models.EmailField(_('email address'), unique=True, db_index=True)
-    phone       = models.CharField(_('phone number'), max_length=20, unique=True, blank=True, null=True)
-    role        = models.CharField(_('role'), max_length=20, choices=UserRole.choices, default=UserRole.PATIENT)
+    id            = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    email         = models.EmailField(_('email address'), unique=True, db_index=True)
+    phone_number  = models.CharField(_('phone number'), max_length=20, unique=True, blank=True, null=True)
+    first_name    = models.CharField(_('first name'), max_length=100)
+    last_name     = models.CharField(_('last name'), max_length=100)
+    role          = models.CharField(_('role'), max_length=20, choices=UserRole.choices, default=UserRole.PATIENT)
 
     # Account status
     is_active   = models.BooleanField(_('active'), default=True)
     is_staff    = models.BooleanField(_('staff status'), default=False)
     is_verified = models.BooleanField(_('email verified'), default=False)
 
-    # MFA
-    mfa_enabled = models.BooleanField(_('MFA enabled'), default=False)
-    mfa_secret  = models.CharField(_('MFA secret'), max_length=64, blank=True, null=True)
-
     # Timestamps
-    last_login_at = models.DateTimeField(_('last login'), blank=True, null=True)
     created_at    = models.DateTimeField(_('created at'), default=timezone.now)
     updated_at    = models.DateTimeField(_('updated at'), auto_now=True)
     deleted_at    = models.DateTimeField(_('deleted at'), blank=True, null=True)
@@ -99,11 +98,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     @property
     def full_name(self):
-        """Returns full name from profile if exists."""
-        try:
-            return f'{self.profile.first_name} {self.profile.last_name}'.strip()
-        except UserProfile.DoesNotExist:
-            return self.email
+        """Returns full name."""
+        return f'{self.first_name} {self.last_name}'.strip()
 
     def soft_delete(self):
         """Soft-delete the user account."""
@@ -122,12 +118,10 @@ class UserProfile(models.Model):
     """
 
     user = models.OneToOneField(
-        User, on_delete=models.CASCADE, related_name='profile', primary_key=True
+        CustomUser, on_delete=models.CASCADE, related_name='profile', primary_key=True
     )
 
     # Personal info
-    first_name  = models.CharField(_('first name'), max_length=100)
-    last_name   = models.CharField(_('last name'), max_length=100)
     date_of_birth = models.DateField(_('date of birth'), blank=True, null=True)
     gender      = models.CharField(_('gender'), max_length=25, choices=GenderChoices.choices, blank=True)
 
@@ -140,10 +134,11 @@ class UserProfile(models.Model):
     # Emergency contact
     emergency_name     = models.CharField(_('emergency contact name'), max_length=200, blank=True)
     emergency_phone    = models.CharField(_('emergency contact phone'), max_length=20, blank=True)
+    emergency_alt_phone = models.CharField(_('emergency alternate phone'), max_length=20, blank=True)
     emergency_relation = models.CharField(_('emergency contact relation'), max_length=50, blank=True)
 
     # Avatar
-    profile_photo_url = models.URLField(_('profile photo URL'), blank=True)
+    profile_photo = models.ImageField(_('profile photo'), upload_to='profile_photos/', blank=True, null=True)
 
     # Timestamps
     created_at = models.DateTimeField(auto_now_add=True)
@@ -159,7 +154,7 @@ class UserProfile(models.Model):
 
     @property
     def full_name(self):
-        return f'{self.first_name} {self.last_name}'.strip()
+        return self.user.full_name
 
     @property
     def age(self):

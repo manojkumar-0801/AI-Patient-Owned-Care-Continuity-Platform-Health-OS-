@@ -44,7 +44,7 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     class Meta:
         model  = User
-        fields = ['email', 'phone', 'password', 'confirm_password', 'role', 'first_name', 'last_name']
+        fields = ['email', 'phone_number', 'password', 'confirm_password', 'role', 'first_name', 'last_name']
         extra_kwargs = {
             'role': {'default': 'PATIENT'},
         }
@@ -55,11 +55,11 @@ class RegisterSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError('An account with this email already exists.')
         return value.lower()
 
-    def validate_phone(self, value):
+    def validate_phone_number(self, value):
         """Validate phone uniqueness and format."""
         if value:
             validate_phone_number(value)
-            if User.objects.filter(phone=value).exists():
+            if User.objects.filter(phone_number=value).exists():
                 raise serializers.ValidationError('An account with this phone number already exists.')
         return value
 
@@ -76,16 +76,11 @@ class RegisterSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         """Create User + UserProfile atomically."""
-        first_name = validated_data.pop('first_name')
-        last_name  = validated_data.pop('last_name')
-
         user = User.objects.create_user(**validated_data)
 
         # Create profile automatically
         UserProfile.objects.create(
             user=user,
-            first_name=first_name,
-            last_name=last_name,
         )
 
         logger.info('New user registered: %s (role: %s)', user.email, user.role)
@@ -131,10 +126,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model  = UserProfile
         fields = [
-            'first_name', 'last_name', 'date_of_birth', 'gender',
+            'date_of_birth', 'gender',
             'blood_type', 'allergies', 'chronic_conditions', 'current_medications',
-            'emergency_name', 'emergency_phone', 'emergency_relation',
-            'profile_photo_url', 'created_at', 'updated_at',
+            'emergency_name', 'emergency_phone', 'emergency_alt_phone', 'emergency_relation',
+            'profile_photo', 'created_at', 'updated_at',
         ]
         read_only_fields = ['created_at', 'updated_at']
 
@@ -150,14 +145,15 @@ class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model  = User
         fields = [
-            'id', 'email', 'phone', 'role',
-            'is_active', 'is_verified', 'mfa_enabled',
-            'last_login_at', 'created_at',
+            'id', 'email', 'phone_number', 'role',
+            'first_name', 'last_name',
+            'is_active', 'is_verified',
+            'created_at',
             'profile', 'age',
         ]
         read_only_fields = [
             'id', 'email', 'role', 'is_active', 'is_verified',
-            'mfa_enabled', 'last_login_at', 'created_at',
+            'created_at',
         ]
 
     def get_age(self, obj):
@@ -171,11 +167,13 @@ class UpdateMeSerializer(serializers.Serializer):
     """
     Serializer for PATCH /me/ — allows updating phone + profile fields together.
     """
-    phone = serializers.CharField(max_length=20, required=False, allow_blank=True)
+    phone_number = serializers.CharField(max_length=20, required=False, allow_blank=True)
 
-    # Profile fields
+    # User fields
     first_name          = serializers.CharField(max_length=100, required=False)
     last_name           = serializers.CharField(max_length=100, required=False)
+
+    # Profile fields
     date_of_birth       = serializers.DateField(required=False, allow_null=True)
     gender              = serializers.ChoiceField(
         choices=['MALE', 'FEMALE', 'OTHER', 'PREFER_NOT_TO_SAY'], required=False, allow_blank=True
@@ -188,21 +186,35 @@ class UpdateMeSerializer(serializers.Serializer):
     current_medications = serializers.ListField(child=serializers.CharField(), required=False)
     emergency_name      = serializers.CharField(max_length=200, required=False, allow_blank=True)
     emergency_phone     = serializers.CharField(max_length=20, required=False, allow_blank=True)
+    emergency_alt_phone = serializers.CharField(max_length=20, required=False, allow_blank=True)
     emergency_relation  = serializers.CharField(max_length=50, required=False, allow_blank=True)
-    profile_photo_url   = serializers.URLField(required=False, allow_blank=True)
+    profile_photo       = serializers.ImageField(required=False, allow_null=True)
 
-    def validate_phone(self, value):
+    def validate_phone_number(self, value):
         if value:
             validate_phone_number(value)
         return value
 
     def update(self, instance, validated_data):
         """Update User and UserProfile fields."""
-        # User-level field
-        phone = validated_data.pop('phone', None)
-        if phone is not None:
-            instance.phone = phone
-            instance.save(update_fields=['phone'])
+        # User-level fields
+        phone_number = validated_data.pop('phone_number', None)
+        first_name = validated_data.pop('first_name', None)
+        last_name = validated_data.pop('last_name', None)
+        
+        user_update_fields = []
+        if phone_number is not None:
+            instance.phone_number = phone_number
+            user_update_fields.append('phone_number')
+        if first_name is not None:
+            instance.first_name = first_name
+            user_update_fields.append('first_name')
+        if last_name is not None:
+            instance.last_name = last_name
+            user_update_fields.append('last_name')
+            
+        if user_update_fields:
+            instance.save(update_fields=user_update_fields)
 
         # Profile-level fields
         profile_fields = list(validated_data.keys())

@@ -1,12 +1,135 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+@theme {
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-success: var(--success);
+  --color-warning: var(--warning);
+  --color-error: var(--error);
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-hover: var(--surface-hover);
+  --color-border: var(--border);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-muted: var(--text-muted);
+}
+
+@layer base {
+  :root {
+    /* Light Mode */
+    --primary: hsl(152 69% 45%);
+    --primary-foreground: hsl(0 0% 100%);
+    --secondary: hsl(215 28% 90%);
+    --secondary-foreground: hsl(215 28% 20%);
+    --success: hsl(152 69% 45%);
+    --warning: hsl(43 96% 45%);
+    --error: hsl(346 87% 53%);
+    --background: hsl(0 0% 100%);
+    --surface: hsl(0 0% 98%);
+    --surface-hover: hsl(210 40% 94%);
+    --border: hsl(215 28% 85%);
+    --text-primary: hsl(222 47% 11%);
+    --text-secondary: hsl(215 20% 40%);
+    --text-muted: hsl(215 15% 60%);
+  }
+
+  .dark {
+    /* Dark Mode */
+    --primary: hsl(152 69% 51%);
+    --primary-foreground: hsl(152 70% 10%);
+    --secondary: hsl(215 28% 17%);
+    --secondary-foreground: hsl(210 40% 98%);
+    --success: hsl(152 69% 51%);
+    --warning: hsl(43 96% 56%);
+    --error: hsl(346 87% 53%);
+    --background: hsl(222 47% 8%);
+    --surface: hsl(222 47% 12%);
+    --surface-hover: hsl(222 47% 16%);
+    --border: hsl(215 28% 20%);
+    --text-primary: hsl(210 40% 98%);
+    --text-secondary: hsl(215 20% 65%);
+    --text-muted: hsl(215 15% 45%);
+  }
+
+  body {
+    @apply bg-background text-text-primary antialiased selection:bg-primary/30 selection:text-primary;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  }
+}
+
+@layer components {
+  /* Typography Hierarchy */
+  
+  /* Page Title - For top level page headers */
+  .heading-page {
+    @apply text-3xl md:text-4xl font-bold text-text-primary leading-tight tracking-tight;
+  }
+  
+  /* Section Title - For major sections within a page */
+  .heading-section {
+    @apply text-xl md:text-2xl font-semibold text-text-primary leading-tight tracking-tight;
+  }
+  
+  /* Card Title - For components, cards, modals */
+  .heading-card {
+    @apply text-lg font-semibold text-text-primary leading-tight;
+  }
+  
+  /* Normal Text - For standard body paragraphs */
+  .text-normal {
+    @apply text-base font-normal text-text-primary leading-relaxed;
+  }
+  
+  /* Small Text - For meta data, helper text, timestamps */
+  .text-small {
+    @apply text-sm font-normal text-text-secondary leading-normal;
+  }
+
+  /* Caption Text - For smallest legal text or sub-meta data */
+  .text-caption {
+    @apply text-xs font-normal text-text-muted leading-normal;
+  }
+  
+  /* Error Text - For validation messages and alerts */
+  .text-error {
+    @apply text-sm font-medium text-error mt-1 leading-normal;
+  }
+  
+  /* Layout & Spacing */
+  .layout-page {
+    @apply px-4 py-8 sm:px-6 md:py-10 lg:px-8;
+  }
+  
+  .layout-card {
+    @apply p-6 md:p-8;
+  }
+  
+  .layout-stack {
+    @apply space-y-6;
+  }
+  
+  .layout-grid {
+    @apply grid gap-6;
+  }
+  
+  /* Border Radius */
+  .radius-card {
+    @apply rounded-3xl;
+  }
+  
+  .radius-component {
+    @apply rounded-xl;
+  }
+  
+  /* Shadows */
+  .shadow-card {
+    @apply shadow-lg shadow-black/10;
+  }
+  
+  .shadow-float {
+    @apply shadow-2xl shadow-black/20;
+  }
 }

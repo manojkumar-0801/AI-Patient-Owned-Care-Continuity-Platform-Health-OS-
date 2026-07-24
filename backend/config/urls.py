@@ -17,15 +17,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
 
     # ─── API v1 ──────────────────────────────────────────────────────────────
-    path('api/v1/auth/',            include('apps.accounts.urls',        namespace='auth')),
-    path('api/v1/patients/',        include('apps.patients.urls',        namespace='patients')),
-    path('api/v1/doctors/',         include('apps.doctors.urls',         namespace='doctors')),
-    path('api/v1/records/',         include('apps.medical_records.urls', namespace='medical_records')),
-    path('api/v1/appointments/',    include('apps.appointments.urls',    namespace='appointments')),
-    path('api/v1/timeline/',        include('apps.timeline.urls',        namespace='timeline')),
-    path('api/v1/notifications/',   include('apps.notifications.urls',   namespace='notifications')),
-    path('api/v1/ai/',              include('apps.ai.urls',              namespace='ai')),
-    path('api/v1/ml/',              include('apps.ml.urls',              namespace='ml')),
+    path('api/v1/', include('config.api_urls')),
 
     # ─── API Schema & Docs ───────────────────────────────────────────────────
     path('api/schema/', SpectacularAPIView.as_view(),                          name='schema'),
@@ -35,5 +27,11 @@ urlpatterns = [
 
 # ─── Serve media files in development ────────────────────────────────────────
 if settings.DEBUG:
+    import debug_toolbar
+
+    urlpatterns += [
+        path("__debug__/", include(debug_toolbar.urls)),
+    ]
+
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
