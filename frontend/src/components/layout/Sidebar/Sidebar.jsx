@@ -27,16 +27,16 @@ export const Sidebar = ({
     { name: 'Patient Profile', path: '/profile', icon: User },
     { name: 'Medical Timeline', path: '/timeline', icon: Activity },
     { name: 'Medical Records', path: '/records', icon: FolderOpen },
-    { name: 'Doctors', path: '/doctors', icon: Users, placeholder: true },
-    { name: 'Appointments', path: '/appointments', icon: Calendar, placeholder: true },
+    { name: 'Doctors', path: '/doctors', icon: Users },
+    { name: 'Appointments', path: '/appointments', icon: Calendar },
     { name: 'Health Insights', path: '/health-insights', icon: Brain },
   ];
 
   const doctorNavItems = [
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Doctor Profile', path: '/doctor/profile', icon: User },
-    { name: 'My Patients', path: '/doctor/patients', icon: Users, placeholder: true },
-    { name: 'Appointments', path: '/doctor/appointments', icon: Calendar, placeholder: true },
+    { name: 'My Patients', path: '/doctor/patients', icon: Users },
+    { name: 'Appointments', path: '/doctor/appointments', icon: Calendar },
   ];
 
   const navItems = isDoctor ? doctorNavItems : patientNavItems;

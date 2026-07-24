@@ -12,6 +12,8 @@ import AppointmentDetails from '../pages/AppointmentDetails';
 import MedicalTimeline from '../pages/MedicalTimeline';
 import TimelineEventDetails from '../pages/TimelineEventDetails';
 import HealthInsights from '../pages/HealthInsights';
+import Notifications from '../pages/Notifications';
+import Doctors from '../pages/Doctors';
 import ProtectedRoute from '../components/ProtectedRoute';
 import { Layout } from '../components/layout';
 
@@ -44,6 +46,8 @@ export default function AppRoutes() {
           <Route path="/timeline" element={<MedicalTimeline />} />
           <Route path="/timeline/:id" element={<TimelineEventDetails />} />
           <Route path="/health-insights" element={<HealthInsights />} />
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/doctors" element={<Doctors />} />
           <Route path="/appointments" element={<AppointmentHistory />} />
           <Route path="/appointments/book" element={<AppointmentBooking />} />
           <Route path="/appointments/:id" element={<AppointmentDetails />} />
