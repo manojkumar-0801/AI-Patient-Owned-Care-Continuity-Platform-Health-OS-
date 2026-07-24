@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import recordService from '../services/recordService';
 import { 
   ArrowLeft, FileText, Calendar, Clock, Building,
-  Stethoscope, File, Download, Trash2, Edit3, AlertCircle, Upload
+  Stethoscope, File, Download, Trash2, Edit3, AlertCircle, Upload, Sparkles
 } from 'lucide-react';
 import { Button, Input, Select, Textarea, Card, CardBody, Badge, Spinner } from '../components/ui';
 
@@ -323,6 +323,28 @@ export default function MedicalRecordDetails() {
                 </div>
               </CardBody>
             </Card>
+
+            {/* AI Summary */}
+            <Card className="md:col-span-2">
+              <CardBody className="p-6">
+                <h2 className="text-xl font-bold text-text-primary mb-6 flex items-center">
+                  <Sparkles className="w-5 h-5 mr-2 text-primary" /> 
+                  AI Summary
+                </h2>
+                <div className="bg-background rounded-2xl p-6 border border-border">
+                  {doc.ai_summary ? (
+                    <pre className="text-sm font-medium text-text-secondary whitespace-pre-wrap max-h-96 overflow-y-auto font-sans leading-relaxed">
+                      {doc.ai_summary}
+                    </pre>
+                  ) : (
+                    <p className="text-sm font-medium text-text-muted italic text-center py-4">
+                      AI summary not available.
+                    </p>
+                  )}
+                </div>
+              </CardBody>
+            </Card>
+
 
           </div>
         </>
