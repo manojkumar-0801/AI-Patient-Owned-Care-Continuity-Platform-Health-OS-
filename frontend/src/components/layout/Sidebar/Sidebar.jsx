@@ -29,7 +29,7 @@ export const Sidebar = ({
     { name: 'Medical Records', path: '/records', icon: FolderOpen },
     { name: 'Doctors', path: '/doctors', icon: Users, placeholder: true },
     { name: 'Appointments', path: '/appointments', icon: Calendar, placeholder: true },
-    { name: 'AI Insights', path: '/insights', icon: Brain, placeholder: true },
+    { name: 'Health Insights', path: '/health-insights', icon: Brain },
   ];
 
   const doctorNavItems = [
