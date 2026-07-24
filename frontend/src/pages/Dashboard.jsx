@@ -1,11 +1,28 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../hooks/useAuth';
 import patientService from '../services/patientService';
-import { Activity, User, FileText, Calendar, Droplet, AlertCircle, Heart, ChevronRight, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import DoctorDashboard from './doctor/DoctorDashboard';
+import { 
+  FileText, 
+  Calendar, 
+  Users, 
+  Brain, 
+  Upload, 
+  User, 
+  Droplet,
+  Clock
+} from 'lucide-react';
+import { 
+  Button, 
+  Card, 
+  CardBody, 
+  Badge,
+  Spinner
+} from '../components/ui';
 
 export default function Dashboard() {
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -26,152 +43,248 @@ export default function Dashboard() {
     fetchProfile();
   }, []);
 
-  return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500/30 selection:text-emerald-200">
-      {/* Top Nav */}
-      <nav className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <div className="flex-shrink-0 flex items-center">
-              <Activity className="h-8 w-8 text-emerald-400 mr-2" />
-              <span className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-cyan-400 bg-clip-text text-transparent">
-                Health OS
-              </span>
-            </div>
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-3 hidden sm:flex">
-                {profile?.profile_photo ? (
-                  <img src={profile.profile_photo} alt="Avatar" className="w-8 h-8 rounded-full object-cover border border-slate-700" />
-                ) : (
-                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-sm border border-emerald-500/30">
-                    {user?.first_name?.[0]}{user?.last_name?.[0]}
-                  </div>
-                )}
-                <div className="text-sm text-slate-400">
-                  <span className="text-slate-200 font-medium">{user?.email}</span>
-                </div>
-              </div>
-              <button
-                onClick={logout}
-                className="px-4 py-2 text-sm font-medium text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors border border-slate-700 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-              >
-                Sign Out
-              </button>
-            </div>
-          </div>
-        </div>
-      </nav>
+  const currentDate = new Date().toLocaleDateString('en-US', {
+    weekday: 'long',
+    month: 'long',
+    day: 'numeric'
+  });
 
-      {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-12">
-        <div className="mb-10 animate-fade-in-up">
-          <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight text-white">
-            Welcome back, <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-400">{user?.first_name || 'Patient'}</span>
+  if (loading) {
+    return (
+      <div className="flex justify-center items-center h-full min-h-[400px]">
+        <Spinner size="lg" label="Loading Dashboard..." />
+      </div>
+    );
+  }
+
+  if (user?.role === 'DOCTOR') {
+    return <DoctorDashboard />;
+  }
+
+  return (
+    <div className="space-y-8 pb-8 animate-fade-in">
+      
+      {/* Section 1: Welcome Header */}
+      <section className="flex flex-col md:flex-row md:items-end justify-between gap-4">
+        <div>
+          <p className="text-sm font-medium text-text-secondary mb-1">{currentDate}</p>
+          <h1 className="text-3xl font-extrabold tracking-tight text-text-primary">
+            Welcome back, <span className="text-primary">{user?.first_name || 'Patient'}</span> 👋
           </h1>
-          <p className="mt-3 text-lg text-slate-400 max-w-2xl">
-            Here's an overview of your health profile and records today. Stay on top of your wellness journey.
+          <p className="mt-2 text-text-secondary max-w-2xl">
+            Here's an overview of your healthcare activity. Stay on top of your wellness journey.
           </p>
         </div>
+        <div className="shrink-0 hidden md:block">
+          <Link to="/records">
+            <Button variant="primary" iconLeft={Upload}>
+              Upload Record
+            </Button>
+          </Link>
+        </div>
+      </section>
 
-        {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <Loader2 className="w-10 h-10 text-emerald-500 animate-spin" />
-          </div>
-        ) : (
-          <div className="space-y-8">
-            {/* Patient Information Summary */}
-            <section>
-              <h2 className="text-xl font-bold text-slate-200 mb-4 flex items-center">
-                <User className="w-5 h-5 mr-2 text-slate-400" />
-                Health Summary
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-center items-start">
-                  <div className="flex items-center text-slate-400 mb-1 text-sm font-medium">
-                    <User className="w-4 h-4 mr-1.5" /> Age
-                  </div>
-                  <div className="text-2xl font-bold text-slate-100">{profile?.age || '--'} yrs</div>
-                </div>
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-center items-start">
-                  <div className="flex items-center text-red-400 mb-1 text-sm font-medium">
-                    <Droplet className="w-4 h-4 mr-1.5" /> Blood Type
-                  </div>
-                  <div className="text-2xl font-bold text-slate-100">{profile?.blood_type || 'Unknown'}</div>
-                </div>
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-center items-start">
-                  <div className="flex items-center text-amber-400 mb-1 text-sm font-medium">
-                    <AlertCircle className="w-4 h-4 mr-1.5" /> Allergies
-                  </div>
-                  <div className="text-xl font-semibold text-slate-200 line-clamp-1">
-                    {profile?.allergies?.length > 0 ? profile.allergies.join(', ') : 'None Reported'}
-                  </div>
-                </div>
-                <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col justify-center items-start">
-                  <div className="flex items-center text-rose-400 mb-1 text-sm font-medium">
-                    <Heart className="w-4 h-4 mr-1.5" /> Conditions
-                  </div>
-                  <div className="text-xl font-semibold text-slate-200 line-clamp-1">
-                    {profile?.chronic_conditions?.length > 0 ? profile.chronic_conditions.join(', ') : 'None'}
-                  </div>
-                </div>
+      {/* Section 2: Statistics Cards */}
+      <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card>
+          <CardBody className="p-5 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-violet-500/10 flex items-center justify-center shrink-0">
+              <FileText className="w-6 h-6 text-violet-500" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-text-secondary">Medical Records</p>
+              <h3 className="text-2xl font-bold text-text-primary">12</h3>
+            </div>
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardBody className="p-5 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-cyan-500/10 flex items-center justify-center shrink-0">
+              <Calendar className="w-6 h-6 text-cyan-500" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-text-secondary">Appointments</p>
+              <h3 className="text-2xl font-bold text-text-primary">2</h3>
+            </div>
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardBody className="p-5 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-emerald-500/10 flex items-center justify-center shrink-0">
+              <Users className="w-6 h-6 text-emerald-500" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-text-secondary">Connected Doctors</p>
+              <h3 className="text-2xl font-bold text-text-primary">3</h3>
+            </div>
+          </CardBody>
+        </Card>
+
+        <Card>
+          <CardBody className="p-5 flex items-center gap-4">
+            <div className="h-12 w-12 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+              <Brain className="w-6 h-6 text-amber-500" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-text-secondary">AI Insights</p>
+              <h3 className="text-2xl font-bold text-text-primary">1</h3>
+            </div>
+          </CardBody>
+        </Card>
+      </section>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Left Column: Quick Actions & Recent Activity */}
+        <div className="lg:col-span-2 space-y-8">
+          
+          {/* Section 3: Quick Actions */}
+          <section>
+            <h2 className="text-xl font-bold text-text-primary mb-4">Quick Actions</h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              
+              <Link to="/records" className="block">
+                <Card interactive className="h-full hover:border-violet-500/50 group">
+                  <CardBody className="p-5 flex items-start gap-4">
+                    <div className="h-10 w-10 rounded-lg bg-violet-500/10 flex items-center justify-center shrink-0 group-hover:bg-violet-500/20 transition-colors">
+                      <Upload className="w-5 h-5 text-violet-500" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-text-primary mb-1">Upload Medical Record</h4>
+                      <p className="text-sm text-text-secondary">Securely store your labs and prescriptions.</p>
+                    </div>
+                  </CardBody>
+                </Card>
+              </Link>
+
+              <Link to="/profile" className="block">
+                <Card interactive className="h-full hover:border-primary/50 group">
+                  <CardBody className="p-5 flex items-start gap-4">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                      <User className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-text-primary mb-1">Update Profile</h4>
+                      <p className="text-sm text-text-secondary">Keep your emergency contacts and info up to date.</p>
+                    </div>
+                  </CardBody>
+                </Card>
+              </Link>
+
+              <Link to="/records" className="block">
+                <Card interactive className="h-full hover:border-primary/50 group">
+                  <CardBody className="p-5 flex items-start gap-4">
+                    <div className="h-10 w-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors">
+                      <FileText className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-text-primary mb-1">View Medical Records</h4>
+                      <p className="text-sm text-text-secondary">Browse your complete health history.</p>
+                    </div>
+                  </CardBody>
+                </Card>
+              </Link>
+
+              {/* Disabled / Coming Soon Card */}
+              <div className="block cursor-not-allowed">
+                <Card className="h-full border-dashed opacity-60">
+                  <CardBody className="p-5 flex items-start gap-4 relative">
+                    <div className="h-10 w-10 rounded-lg bg-surface flex items-center justify-center shrink-0 border border-border">
+                      <Calendar className="w-5 h-5 text-text-secondary" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <h4 className="font-semibold text-text-primary">Book Appointment</h4>
+                        <Badge variant="secondary" size="sm">Soon</Badge>
+                      </div>
+                      <p className="text-sm text-text-secondary">Scheduling will be available in a future update.</p>
+                    </div>
+                  </CardBody>
+                </Card>
               </div>
-            </section>
 
-            {/* Quick Action Cards */}
-            <section>
-              <h2 className="text-xl font-bold text-slate-200 mb-4 flex items-center">
-                <Activity className="w-5 h-5 mr-2 text-slate-400" />
-                Quick Actions
-              </h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            </div>
+          </section>
+
+          {/* Section 4: Recent Activity */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-text-primary">Recent Activity</h2>
+              <Button variant="outline" size="sm">View All</Button>
+            </div>
+            <Card>
+              <div className="divide-y divide-border">
                 
-                {/* Card 1 */}
-                <Link to="/profile" className="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-emerald-500/50 hover:bg-slate-800/50 transition-all duration-300 group flex flex-col">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="h-12 w-12 rounded-xl bg-emerald-500/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-emerald-500/20 transition-all">
-                      <User className="w-6 h-6 text-emerald-400" />
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-emerald-400 transition-colors" />
+                {/* Activity Item 1 */}
+                <div className="p-5 flex items-center gap-4 hover:bg-surface-hover transition-colors">
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <FileText className="w-5 h-5 text-primary" />
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-200 mb-2">Patient Profile</h3>
-                  <p className="text-sm text-slate-400 flex-grow">
-                    Manage your personal information, contact details, and platform preferences.
-                  </p>
-                </Link>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-text-primary truncate">Uploaded Blood Report</p>
+                    <p className="text-sm text-text-secondary flex items-center gap-1 mt-0.5">
+                      <Clock className="w-3 h-3" /> 2 hours ago
+                    </p>
+                  </div>
+                </div>
 
-                {/* Card 2 */}
-                <Link to="/records" className="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-violet-500/50 hover:bg-slate-800/50 transition-all duration-300 group flex flex-col">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="h-12 w-12 rounded-xl bg-violet-500/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-violet-500/20 transition-all">
-                      <FileText className="w-6 h-6 text-violet-400" />
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-violet-400 transition-colors" />
+                {/* Activity Item 2 */}
+                <div className="p-5 flex items-center gap-4 hover:bg-surface-hover transition-colors">
+                  <div className="h-10 w-10 rounded-full bg-warning/10 flex items-center justify-center shrink-0">
+                    <User className="w-5 h-5 text-warning" />
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-200 mb-2">Medical Records</h3>
-                  <p className="text-sm text-slate-400 flex-grow">
-                    Access your uploaded documents, lab results, and generate secure sharing links.
-                  </p>
-                </Link>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-text-primary truncate">Updated Emergency Contact</p>
+                    <p className="text-sm text-text-secondary flex items-center gap-1 mt-0.5">
+                      <Clock className="w-3 h-3" /> Yesterday
+                    </p>
+                  </div>
+                </div>
 
-                {/* Card 3 */}
-                <Link to="/appointments" className="bg-slate-900 border border-slate-800 rounded-2xl p-6 hover:border-cyan-500/50 hover:bg-slate-800/50 transition-all duration-300 group flex flex-col">
-                  <div className="flex justify-between items-start mb-4">
-                    <div className="h-12 w-12 rounded-xl bg-cyan-500/10 flex items-center justify-center group-hover:scale-110 group-hover:bg-cyan-500/20 transition-all">
-                      <Calendar className="w-6 h-6 text-cyan-400" />
-                    </div>
-                    <ChevronRight className="w-5 h-5 text-slate-600 group-hover:text-cyan-400 transition-colors" />
+                {/* Activity Item 3 */}
+                <div className="p-5 flex items-center gap-4 hover:bg-surface-hover transition-colors">
+                  <div className="h-10 w-10 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                    <Brain className="w-5 h-5 text-amber-500" />
                   </div>
-                  <h3 className="text-lg font-semibold text-slate-200 mb-2">Appointments</h3>
-                  <p className="text-sm text-slate-400 flex-grow">
-                    Schedule, reschedule, or view upcoming visits with your healthcare providers.
-                  </p>
-                </Link>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-text-primary truncate">AI Summary Generated</p>
+                    <p className="text-sm text-text-secondary flex items-center gap-1 mt-0.5">
+                      <Clock className="w-3 h-3" /> 3 days ago
+                    </p>
+                  </div>
+                </div>
 
               </div>
-            </section>
-          </div>
-        )}
-      </main>
+            </Card>
+          </section>
+        </div>
+
+        {/* Right Column: Health Tip */}
+        <div className="lg:col-span-1 space-y-8">
+          
+          {/* Section 5: Health Tip */}
+          <section>
+            <h2 className="text-xl font-bold text-text-primary mb-4 flex items-center gap-2">
+               Daily Health Tip
+            </h2>
+            <Card className="bg-gradient-to-br from-primary/5 to-transparent border-primary/20">
+              <CardBody className="p-6">
+                <div className="h-12 w-12 rounded-xl bg-primary/20 flex items-center justify-center mb-4">
+                  <Droplet className="w-6 h-6 text-primary" />
+                </div>
+                <h3 className="text-lg font-semibold text-text-primary mb-2">Stay Hydrated</h3>
+                <p className="text-text-secondary text-sm leading-relaxed">
+                  Drinking enough water supports your overall health, improves brain function, and helps maintain energy levels throughout the day. Aim for at least 8 glasses daily!
+                </p>
+              </CardBody>
+            </Card>
+          </section>
+
+        </div>
+      </div>
+      
     </div>
   );
 }

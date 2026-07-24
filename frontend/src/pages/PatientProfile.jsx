@@ -3,9 +3,10 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../hooks/useAuth';
 import patientService from '../services/patientService';
 import { 
-  ArrowLeft, User, Phone, Shield, FileText, Activity, 
-  Droplet, AlertCircle, Heart, CheckCircle2, Loader2, Edit3 
+  User, Phone, Shield, FileText, 
+  Edit3, Key, UploadCloud, Mail, Calendar, Activity, CheckCircle
 } from 'lucide-react';
+import { Button, Card, CardBody, Badge, Spinner, EmptyState } from '../components/ui';
 
 export default function PatientProfile() {
   const navigate = useNavigate();
@@ -13,13 +14,11 @@ export default function PatientProfile() {
   const [demographics, setDemographics] = useState(null);
   const [medicalInfo, setMedicalInfo] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchAllData = async () => {
       try {
         setLoading(true);
-        // Fetch both demographics (/auth/me/) and medical profile (/patients/profile/) concurrently
         const [meRes, profileRes] = await Promise.all([
           patientService.getMe(),
           patientService.getPatientProfile()
@@ -27,10 +26,8 @@ export default function PatientProfile() {
         
         if (meRes.success) setDemographics(meRes.data.profile);
         if (profileRes.success) setMedicalInfo(profileRes.data);
-        
       } catch (err) {
         console.error("Failed to load profile data:", err);
-        setError("Failed to load your profile data. Please try again later.");
       } finally {
         setLoading(false);
       }
@@ -41,231 +38,267 @@ export default function PatientProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center">
-        <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mb-4" />
-        <p className="text-slate-400">Loading your profile...</p>
+      <div className="flex justify-center items-center h-full min-h-[400px]">
+        <Spinner size="lg" label="Loading Profile..." />
       </div>
     );
   }
 
+  // Format dates for display
+  const createdDate = user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A';
+  const lastUpdated = user?.updated_at ? new Date(user.updated_at).toLocaleDateString() : 'Recently';
+
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500/30 selection:text-emerald-200">
+    <div className="space-y-8 pb-8 animate-fade-in">
       
-      {/* Top Nav */}
-      <nav className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center">
-              <button 
-                onClick={() => navigate(-1)}
-                className="mr-4 p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-              >
-                <ArrowLeft className="w-5 h-5" />
-              </button>
-              <h1 className="text-xl font-bold text-slate-200">Patient Profile</h1>
-            </div>
-            <button 
-              onClick={() => navigate('/profile/edit')}
-              className="flex items-center px-4 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-400 text-sm font-medium rounded-lg transition-colors border border-slate-700 hover:border-slate-600 focus:outline-none focus:ring-2 focus:ring-emerald-500/50"
-            >
-              <Edit3 className="w-4 h-4 mr-2" />
-              Edit Profile
-            </button>
-          </div>
+      {/* Section 1: Page Header */}
+      <section className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border pb-6">
+        <div>
+          <h1 className="text-3xl font-extrabold tracking-tight text-text-primary mb-2">Patient Profile</h1>
+          <p className="text-text-secondary">
+            Manage your personal information and emergency contacts.
+          </p>
         </div>
-      </nav>
+        <div className="shrink-0">
+          <Button 
+            variant="primary" 
+            iconLeft={Edit3}
+            onClick={() => navigate('/profile/edit')}
+          >
+            Edit Profile
+          </Button>
+        </div>
+      </section>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        
-        {error && (
-          <div className="mb-6 bg-rose-500/10 border border-rose-500/50 text-rose-400 px-4 py-3 rounded-xl flex items-center">
-            <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />
-            <p>{error}</p>
-          </div>
-        )}
-
-        {/* Profile Header */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 sm:p-8 mb-8 flex flex-col sm:flex-row items-center sm:items-start gap-6 relative overflow-hidden">
-          {/* Subtle gradient background decoration */}
-          <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
+      {/* Section 2: Profile Summary Card */}
+      <Card className="overflow-hidden">
+        <CardBody className="p-6 md:p-8 flex flex-col md:flex-row items-center md:items-start gap-6 relative">
+          <div className="absolute top-0 right-0 -mr-20 -mt-20 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none"></div>
           
-          <div className="h-24 w-24 rounded-2xl bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center shadow-lg shadow-emerald-500/20 flex-shrink-0">
+          <div className="h-28 w-28 rounded-2xl bg-gradient-to-br from-primary to-cyan-500 flex items-center justify-center shadow-lg shadow-primary/20 shrink-0">
             {demographics?.profile_photo ? (
-              <img src={demographics.profile_photo} alt="Profile" className="h-full w-full object-cover rounded-2xl" />
+              <img src={demographics.profile_photo} alt="Profile" loading="lazy" className="h-full w-full object-cover rounded-2xl" />
             ) : (
-              <span className="text-3xl font-bold text-white uppercase">{user?.first_name?.[0]}{user?.last_name?.[0]}</span>
+              <span className="text-4xl font-bold text-primary-foreground uppercase">
+                {user?.first_name?.[0]}{user?.last_name?.[0]}
+              </span>
             )}
           </div>
           
-          <div className="flex-1 text-center sm:text-left z-10">
-            <h2 className="text-2xl sm:text-3xl font-bold text-white mb-1">{user?.full_name}</h2>
-            <p className="text-emerald-400 font-medium mb-3">{medicalInfo?.patient_id || 'Patient'}</p>
+          <div className="flex-1 text-center sm:text-left z-10 w-full">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
+              <div>
+                <h2 className="text-2xl font-bold text-text-primary mb-1">{user?.full_name}</h2>
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
+                  <Badge variant="primary" size="sm">ID: {medicalInfo?.patient_id || 'PENDING'}</Badge>
+                  {user?.is_verified && <Badge variant="success" size="sm" icon={CheckCircle}>Verified</Badge>}
+                </div>
+              </div>
+            </div>
             
-            <div className="flex flex-wrap justify-center sm:justify-start gap-3 mt-2 text-sm text-slate-400">
-              <span className="flex items-center"><User className="w-4 h-4 mr-1" /> {user?.email}</span>
-              {user?.phone_number && <span className="flex items-center"><Phone className="w-4 h-4 mr-1" /> {user.phone_number}</span>}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6 pt-6 border-t border-border">
+              <div className="flex items-center gap-3 text-text-secondary">
+                <Mail className="w-4 h-4 text-primary shrink-0" />
+                <span className="text-sm truncate">{user?.email || 'N/A'}</span>
+              </div>
+              <div className="flex items-center gap-3 text-text-secondary">
+                <Phone className="w-4 h-4 text-primary shrink-0" />
+                <span className="text-sm">{user?.phone_number || 'N/A'}</span>
+              </div>
+              <div className="flex items-center gap-3 text-text-secondary">
+                <Calendar className="w-4 h-4 text-primary shrink-0" />
+                <span className="text-sm">{demographics?.date_of_birth || 'N/A'}</span>
+              </div>
+              <div className="flex items-center gap-3 text-text-secondary">
+                <User className="w-4 h-4 text-primary shrink-0" />
+                <span className="text-sm capitalize">{demographics?.gender || 'N/A'}</span>
+              </div>
             </div>
           </div>
+        </CardBody>
+      </Card>
 
-          {user?.is_verified && (
-            <div className="hidden sm:flex absolute top-6 right-6 items-center text-xs font-medium text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-full border border-emerald-500/20">
-              <CheckCircle2 className="w-3.5 h-3.5 mr-1" /> Verified Account
-            </div>
-          )}
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        
+        {/* Left Column (2/3 width) */}
+        <div className="lg:col-span-2 space-y-8">
           
-          {/* Column 1: Demographics & Contact */}
-          <div className="space-y-8">
-            <section className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-              <h3 className="text-lg font-semibold text-slate-200 mb-4 flex items-center">
-                <User className="w-5 h-5 mr-2 text-slate-400" />
-                Personal Details
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <div className="text-sm text-slate-500 mb-1">Gender</div>
-                  <div className="font-medium text-slate-200">{demographics?.gender || 'Not specified'}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-slate-500 mb-1">Date of Birth</div>
-                  <div className="font-medium text-slate-200">
-                    {demographics?.date_of_birth || 'Not specified'} 
-                    {demographics?.age && <span className="text-slate-400 ml-2">({demographics.age} years)</span>}
+          {/* Section 3: Personal Information */}
+          <section>
+            <h2 className="text-xl font-bold text-text-primary mb-4 flex items-center">
+              <User className="w-5 h-5 mr-2 text-primary" />
+              Personal Information
+            </h2>
+            <Card>
+              <CardBody className="p-0">
+                <div className="divide-y divide-border">
+                  <div className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <span className="text-sm text-text-muted font-medium min-w-[150px]">Full Name</span>
+                    <span className="text-text-primary font-medium flex-1">{user?.full_name || 'N/A'}</span>
+                  </div>
+                  <div className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <span className="text-sm text-text-muted font-medium min-w-[150px]">Email</span>
+                    <span className="text-text-primary font-medium flex-1">{user?.email || 'N/A'}</span>
+                  </div>
+                  <div className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <span className="text-sm text-text-muted font-medium min-w-[150px]">Phone Number</span>
+                    <span className="text-text-primary font-medium flex-1">{user?.phone_number || 'N/A'}</span>
+                  </div>
+                  <div className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <span className="text-sm text-text-muted font-medium min-w-[150px]">Date of Birth</span>
+                    <span className="text-text-primary font-medium flex-1">{demographics?.date_of_birth || 'N/A'}</span>
+                  </div>
+                  <div className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <span className="text-sm text-text-muted font-medium min-w-[150px]">Blood Group</span>
+                    <span className="text-text-primary font-medium flex-1">{demographics?.blood_type || 'Unknown'}</span>
+                  </div>
+                  <div className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <span className="text-sm text-text-muted font-medium min-w-[150px]">Gender</span>
+                    <span className="text-text-primary font-medium flex-1 capitalize">{demographics?.gender || 'N/A'}</span>
+                  </div>
+                  <div className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-2">
+                    <span className="text-sm text-text-muted font-medium min-w-[150px]">Address</span>
+                    <span className="text-text-primary font-medium flex-1">{demographics?.address || 'No address provided'}</span>
                   </div>
                 </div>
-              </div>
-            </section>
+              </CardBody>
+            </Card>
+          </section>
 
-            <section className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-              <h3 className="text-lg font-semibold text-slate-200 mb-4 flex items-center">
-                <Shield className="w-5 h-5 mr-2 text-slate-400" />
+          {/* Section 4: Emergency Contact */}
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h2 className="text-xl font-bold text-text-primary flex items-center">
+                <Shield className="w-5 h-5 mr-2 text-error" />
                 Emergency Contact
-              </h3>
-              <div className="space-y-4">
+              </h2>
+              {demographics?.emergency_name && (
+                <Button variant="outline" size="sm" onClick={() => navigate('/profile/edit')}>
+                  Edit Contact
+                </Button>
+              )}
+            </div>
+            
+            <Card>
+              <CardBody className="p-0">
                 {demographics?.emergency_name ? (
-                  <>
-                    <div>
-                      <div className="text-sm text-slate-500 mb-1">Name (Relation)</div>
-                      <div className="font-medium text-slate-200">
-                        {demographics.emergency_name} 
-                        {demographics.emergency_relation && <span className="text-slate-400"> ({demographics.emergency_relation})</span>}
-                      </div>
+                  <div className="divide-y divide-border">
+                    <div className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-2">
+                      <span className="text-sm text-text-muted font-medium min-w-[150px]">Contact Name</span>
+                      <span className="text-text-primary font-medium flex-1">{demographics.emergency_name}</span>
                     </div>
-                    <div>
-                      <div className="text-sm text-slate-500 mb-1">Phone Number</div>
-                      <div className="font-medium text-slate-200">{demographics.emergency_phone || 'Not provided'}</div>
+                    <div className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-2">
+                      <span className="text-sm text-text-muted font-medium min-w-[150px]">Relationship</span>
+                      <span className="text-text-primary font-medium flex-1">{demographics.emergency_relation || 'N/A'}</span>
                     </div>
-                    {demographics.emergency_alt_phone && (
-                      <div>
-                        <div className="text-sm text-slate-500 mb-1">Alternate Phone</div>
-                        <div className="font-medium text-slate-200">{demographics.emergency_alt_phone}</div>
-                      </div>
-                    )}
-                  </>
+                    <div className="p-4 md:p-5 flex flex-col md:flex-row md:items-center justify-between gap-2">
+                      <span className="text-sm text-text-muted font-medium min-w-[150px]">Phone Number</span>
+                      <span className="text-text-primary font-medium flex-1">{demographics.emergency_phone || 'N/A'}</span>
+                    </div>
+                  </div>
                 ) : (
-                  <p className="text-slate-500 text-sm italic">No emergency contact provided.</p>
+                  <EmptyState 
+                    icon={Shield}
+                    title="No Emergency Contact" 
+                    description="You haven't added an emergency contact yet. This is highly recommended for your safety."
+                    actionText="Add Contact"
+                    onAction={() => navigate('/profile/edit')}
+                  />
                 )}
-              </div>
-            </section>
-          </div>
-
-          {/* Column 2: Health Info & Insurance */}
-          <div className="space-y-8">
-            <section className="bg-slate-900 border border-slate-800 rounded-2xl p-6 relative overflow-hidden group">
-              <div className="absolute top-0 right-0 p-4 opacity-5 pointer-events-none group-hover:opacity-10 transition-opacity">
-                <Activity className="w-24 h-24" />
-              </div>
-              <h3 className="text-lg font-semibold text-slate-200 mb-4 flex items-center">
-                <Heart className="w-5 h-5 mr-2 text-rose-400" />
-                Health Information
-              </h3>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between border-b border-slate-800 pb-3">
-                  <div className="text-sm text-slate-500 flex items-center"><Droplet className="w-4 h-4 mr-2 text-red-400" /> Blood Type</div>
-                  <div className="font-bold text-slate-200">{demographics?.blood_type || 'Unknown'}</div>
-                </div>
-                
-                <div className="border-b border-slate-800 pb-3">
-                  <div className="text-sm text-slate-500 mb-2 flex items-center"><AlertCircle className="w-4 h-4 mr-2 text-amber-400" /> Allergies</div>
-                  <div className="flex flex-wrap gap-2">
-                    {demographics?.allergies?.length > 0 ? (
-                      demographics.allergies.map((allergy, i) => (
-                        <span key={i} className="bg-amber-500/10 text-amber-400 border border-amber-500/20 px-2.5 py-1 rounded-md text-sm">
-                          {allergy}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-slate-500 text-sm">None reported</span>
-                    )}
-                  </div>
-                </div>
-
-                <div className="border-b border-slate-800 pb-3">
-                  <div className="text-sm text-slate-500 mb-2 flex items-center"><Activity className="w-4 h-4 mr-2 text-cyan-400" /> Chronic Conditions</div>
-                  <div className="flex flex-wrap gap-2">
-                    {demographics?.chronic_conditions?.length > 0 ? (
-                      demographics.chronic_conditions.map((condition, i) => (
-                        <span key={i} className="bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 px-2.5 py-1 rounded-md text-sm">
-                          {condition}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-slate-500 text-sm">None reported</span>
-                    )}
-                  </div>
-                </div>
-
-                <div>
-                  <div className="text-sm text-slate-500 mb-2">Current Medications</div>
-                  <div className="flex flex-wrap gap-2">
-                    {demographics?.current_medications?.length > 0 ? (
-                      demographics.current_medications.map((med, i) => (
-                        <span key={i} className="bg-slate-800 text-slate-300 border border-slate-700 px-2.5 py-1 rounded-md text-sm">
-                          {med}
-                        </span>
-                      ))
-                    ) : (
-                      <span className="text-slate-500 text-sm">None</span>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            <section className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-              <h3 className="text-lg font-semibold text-slate-200 mb-4 flex items-center">
-                <FileText className="w-5 h-5 mr-2 text-slate-400" />
-                Insurance & Identifiers
-              </h3>
-              <div className="space-y-4">
-                <div>
-                  <div className="text-sm text-slate-500 mb-1">National Health ID</div>
-                  <div className="font-mono bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 inline-block text-slate-300 text-sm">
-                    {medicalInfo?.national_health_id || 'Not provided'}
-                  </div>
-                </div>
-                <div>
-                  <div className="text-sm text-slate-500 mb-1">Insurance Provider</div>
-                  <div className="font-medium text-slate-200">{medicalInfo?.insurance_provider || 'Not provided'}</div>
-                </div>
-                <div>
-                  <div className="text-sm text-slate-500 mb-1">Policy Number</div>
-                  <div className="font-mono text-slate-300 text-sm">{medicalInfo?.insurance_policy_no || '-'}</div>
-                </div>
-                {medicalInfo?.insurance_expiry_date && (
-                  <div>
-                    <div className="text-sm text-slate-500 mb-1">Expiry Date</div>
-                    <div className="font-medium text-slate-200">{medicalInfo.insurance_expiry_date}</div>
-                  </div>
-                )}
-              </div>
-            </section>
-          </div>
+              </CardBody>
+            </Card>
+          </section>
+          
         </div>
 
-      </main>
+        {/* Right Column (1/3 width) */}
+        <div className="lg:col-span-1 space-y-8">
+          
+          {/* Section 6: Quick Actions */}
+          <section>
+            <h2 className="text-xl font-bold text-text-primary mb-4 flex items-center">
+              <Activity className="w-5 h-5 mr-2 text-primary" />
+              Quick Actions
+            </h2>
+            <Card>
+              <CardBody className="p-4 space-y-3">
+                <Button 
+                  fullWidth 
+                  variant="outline" 
+                  iconLeft={Edit3}
+                  onClick={() => navigate('/profile/edit')}
+                  className="justify-start"
+                >
+                  Edit Profile
+                </Button>
+                <Button 
+                  fullWidth 
+                  variant="outline" 
+                  iconLeft={Key}
+                  className="justify-start"
+                >
+                  Change Password
+                </Button>
+                <Button 
+                  fullWidth 
+                  variant="outline" 
+                  iconLeft={FileText}
+                  onClick={() => navigate('/records')}
+                  className="justify-start"
+                >
+                  View Medical Records
+                </Button>
+                <Button 
+                  fullWidth 
+                  variant="outline" 
+                  iconLeft={UploadCloud}
+                  onClick={() => navigate('/records')}
+                  className="justify-start"
+                >
+                  Upload New Document
+                </Button>
+              </CardBody>
+            </Card>
+          </section>
+
+          {/* Section 5: Account Information */}
+          <section>
+            <h2 className="text-xl font-bold text-text-primary mb-4 flex items-center">
+              <Shield className="w-5 h-5 mr-2 text-text-secondary" />
+              Account Information
+            </h2>
+            <Card>
+              <CardBody className="p-0">
+                <div className="divide-y divide-border">
+                  <div className="p-4 flex flex-col gap-1">
+                    <span className="text-xs text-text-muted font-medium uppercase tracking-wider">Account Status</span>
+                    <div>
+                      {user?.is_active !== false ? (
+                        <Badge variant="success" size="sm">Active</Badge>
+                      ) : (
+                        <Badge variant="danger" size="sm">Inactive</Badge>
+                      )}
+                    </div>
+                  </div>
+                  <div className="p-4 flex flex-col gap-1">
+                    <span className="text-xs text-text-muted font-medium uppercase tracking-wider">User Role</span>
+                    <span className="text-text-primary font-medium capitalize">{user?.role || 'Patient'}</span>
+                  </div>
+                  <div className="p-4 flex flex-col gap-1">
+                    <span className="text-xs text-text-muted font-medium uppercase tracking-wider">Account Created</span>
+                    <span className="text-text-primary text-sm">{createdDate}</span>
+                  </div>
+                  <div className="p-4 flex flex-col gap-1">
+                    <span className="text-xs text-text-muted font-medium uppercase tracking-wider">Last Updated</span>
+                    <span className="text-text-primary text-sm">{lastUpdated}</span>
+                  </div>
+                </div>
+              </CardBody>
+            </Card>
+          </section>
+
+        </div>
+      </div>
     </div>
   );
 }

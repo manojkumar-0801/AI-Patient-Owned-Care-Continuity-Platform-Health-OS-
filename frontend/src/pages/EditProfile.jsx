@@ -4,6 +4,7 @@ import patientService from '../services/patientService';
 import { 
   ArrowLeft, Save, Loader2, AlertCircle, CheckCircle2, Camera 
 } from 'lucide-react';
+import { Button, Input, Select, ThemeToggle } from '../components/ui';
 
 export default function EditProfile() {
   const navigate = useNavigate();
@@ -147,53 +148,58 @@ export default function EditProfile() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col justify-center items-center">
-        <Loader2 className="w-12 h-12 text-emerald-500 animate-spin mb-4" />
-        <p className="text-slate-400">Loading form...</p>
+      <div className="min-h-screen bg-background flex flex-col justify-center items-center">
+        <Loader2 className="w-12 h-12 text-primary animate-spin mb-4" />
+        <p className="text-text-secondary">Loading form...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 font-sans selection:bg-emerald-500/30 selection:text-emerald-200 pb-12">
+    <div className="min-h-screen bg-background text-text-primary font-sans selection:bg-primary/30 selection:text-primary pb-12">
       {/* Top Nav */}
-      <nav className="border-b border-slate-800 bg-slate-950/80 backdrop-blur-md sticky top-0 z-50">
+      <nav className="border-b border-border bg-background/80 backdrop-blur-md sticky top-0 z-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center">
-            <button 
-              onClick={() => navigate('/profile')}
-              className="mr-4 p-2 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors focus:outline-none"
-            >
-              <ArrowLeft className="w-5 h-5" />
-            </button>
-            <h1 className="text-xl font-bold text-slate-200">Edit Profile</h1>
+          <div className="flex h-16 items-center justify-between">
+            <div className="flex items-center">
+              <Button 
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate('/profile')}
+                className="mr-4 hover:bg-surface-hover"
+              >
+                <ArrowLeft className="w-5 h-5" />
+              </Button>
+              <h1 className="text-xl font-bold text-text-primary">Edit Profile</h1>
+            </div>
+            <ThemeToggle />
           </div>
         </div>
       </nav>
 
       <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {error && (
-          <div className="mb-6 bg-rose-500/10 border border-rose-500/50 text-rose-400 px-4 py-3 rounded-xl flex items-center">
+          <div className="mb-6 bg-error/10 border border-error/50 text-error px-4 py-3 rounded-xl flex items-center">
             <AlertCircle className="w-5 h-5 mr-3 flex-shrink-0" />
             <p>{error}</p>
           </div>
         )}
 
         {success && (
-          <div className="mb-6 bg-emerald-500/10 border border-emerald-500/50 text-emerald-400 px-4 py-3 rounded-xl flex items-center">
+          <div className="mb-6 bg-success/10 border border-success/50 text-success px-4 py-3 rounded-xl flex items-center">
             <CheckCircle2 className="w-5 h-5 mr-3 flex-shrink-0" />
             <p>{success}</p>
           </div>
         )}
 
         {/* Profile Photo Upload Section */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 mb-8 flex flex-col sm:flex-row items-center gap-6">
+        <div className="bg-surface border border-border rounded-2xl p-6 mb-8 flex flex-col sm:flex-row items-center gap-6">
           <div className="relative group">
-            <div className="h-24 w-24 rounded-2xl bg-slate-800 flex items-center justify-center overflow-hidden border-2 border-slate-700">
+            <div className="h-24 w-24 rounded-2xl bg-background flex items-center justify-center overflow-hidden border-2 border-border">
               {photoPreview ? (
                 <img src={photoPreview} alt="Preview" className="h-full w-full object-cover" />
               ) : (
-                <Camera className="w-8 h-8 text-slate-500" />
+                <Camera className="w-8 h-8 text-text-muted" />
               )}
             </div>
             <label className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer rounded-2xl">
@@ -232,33 +238,34 @@ export default function EditProfile() {
             </label>
           </div>
           <div>
-            <h3 className="text-lg font-medium text-slate-200">Profile Picture</h3>
-            <p className="text-sm text-slate-400 mt-1">Upload a new avatar. Max size 5MB.</p>
-            {uploadingPhoto && <p className="text-sm text-emerald-400 mt-2 flex items-center"><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Uploading...</p>}
+            <h3 className="text-lg font-medium text-text-primary">Profile Picture</h3>
+            <p className="text-sm text-text-secondary mt-1">Upload a new avatar. Max size 5MB.</p>
+            {uploadingPhoto && <p className="text-sm text-primary mt-2 flex items-center"><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Uploading...</p>}
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8">
           
           {/* Section 1: Demographics */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold text-slate-200 mb-6 border-b border-slate-800 pb-2">Personal & Contact Details</h2>
+          <div className="bg-surface border border-border rounded-2xl p-6">
+            <h2 className="text-lg font-semibold text-text-primary mb-6 border-b border-border pb-2">Personal & Contact Details</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-2">Phone Number</label>
-                <input 
-                  type="text" name="phone_number" value={formData.phone_number} onChange={handleChange}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-colors"
-                  placeholder="+1234567890"
-                />
-              </div>
+              <Input 
+                label="Phone Number"
+                type="text" 
+                name="phone_number" 
+                value={formData.phone_number} 
+                onChange={handleChange}
+                placeholder="+1234567890"
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-2">Gender</label>
+              <div className="relative flex flex-col w-full">
+                <label className="block text-sm font-medium text-text-secondary mb-1.5 ml-1">Gender</label>
                 <select 
-                  name="gender" value={formData.gender} onChange={handleChange}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-colors"
+                  name="gender" 
+                  value={formData.gender} 
+                  onChange={handleChange}
+                  className="w-full bg-surface border border-border rounded-xl px-4 py-2.5 text-text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50 hover:border-text-muted transition-all duration-300"
                 >
                   <option value="PREFER_NOT_TO_SAY">Prefer not to say</option>
                   <option value="MALE">Male</option>
@@ -267,20 +274,22 @@ export default function EditProfile() {
                 </select>
               </div>
 
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-2">Date of Birth</label>
-                <input 
-                  type="date" name="date_of_birth" value={formData.date_of_birth} onChange={handleChange}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-colors"
-                  style={{ colorScheme: 'dark' }}
-                />
-              </div>
+              <Input 
+                label="Date of Birth"
+                type="date" 
+                name="date_of_birth" 
+                value={formData.date_of_birth} 
+                onChange={handleChange}
+                style={{ colorScheme: 'dark' }}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-2">Blood Type</label>
+              <div className="relative flex flex-col w-full">
+                <label className="block text-sm font-medium text-text-secondary mb-1.5 ml-1">Blood Type</label>
                 <select 
-                  name="blood_type" value={formData.blood_type} onChange={handleChange}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500/50 focus:ring-1 focus:ring-emerald-500/50 transition-colors"
+                  name="blood_type" 
+                  value={formData.blood_type} 
+                  onChange={handleChange}
+                  className="w-full bg-surface border border-border rounded-xl px-4 py-2.5 text-text-primary focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/50 hover:border-text-muted transition-all duration-300"
                 >
                   <option value="">Unknown</option>
                   <option value="A+">A+</option><option value="A-">A-</option>
@@ -289,138 +298,131 @@ export default function EditProfile() {
                   <option value="O+">O+</option><option value="O-">O-</option>
                 </select>
               </div>
-
             </div>
           </div>
 
           {/* Section 2: Medical Information */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold text-slate-200 mb-6 border-b border-slate-800 pb-2">Medical Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-400 mb-2">Allergies (comma separated)</label>
-                <input 
-                  type="text" name="allergies" value={formData.allergies} onChange={handleChange}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500/50"
-                  placeholder="e.g. Peanuts, Penicillin"
-                />
-              </div>
+          <div className="bg-surface border border-border rounded-2xl p-6">
+            <h2 className="text-lg font-semibold text-text-primary mb-6 border-b border-border pb-2">Medical Information</h2>
+            <div className="grid grid-cols-1 gap-6">
+              <Input 
+                label="Allergies (comma separated)"
+                type="text" 
+                name="allergies" 
+                value={formData.allergies} 
+                onChange={handleChange}
+                placeholder="e.g. Peanuts, Penicillin"
+              />
 
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-400 mb-2">Chronic Conditions (comma separated)</label>
-                <input 
-                  type="text" name="chronic_conditions" value={formData.chronic_conditions} onChange={handleChange}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500/50"
-                  placeholder="e.g. Hypertension, Asthma"
-                />
-              </div>
+              <Input 
+                label="Chronic Conditions (comma separated)"
+                type="text" 
+                name="chronic_conditions" 
+                value={formData.chronic_conditions} 
+                onChange={handleChange}
+                placeholder="e.g. Hypertension, Asthma"
+              />
 
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-400 mb-2">Current Medications (comma separated)</label>
-                <input 
-                  type="text" name="current_medications" value={formData.current_medications} onChange={handleChange}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500/50"
-                  placeholder="e.g. Lisinopril 10mg, Albuterol"
-                />
-              </div>
-
+              <Input 
+                label="Current Medications (comma separated)"
+                type="text" 
+                name="current_medications" 
+                value={formData.current_medications} 
+                onChange={handleChange}
+                placeholder="e.g. Lisinopril 10mg, Albuterol"
+              />
             </div>
           </div>
 
           {/* Section 3: Emergency Contact & Insurance */}
-          <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-            <h2 className="text-lg font-semibold text-slate-200 mb-6 border-b border-slate-800 pb-2">Emergency Contact & Insurance</h2>
+          <div className="bg-surface border border-border rounded-2xl p-6">
+            <h2 className="text-lg font-semibold text-text-primary mb-6 border-b border-border pb-2">Emergency Contact & Insurance</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-2">Emergency Contact Name</label>
-                <input 
-                  type="text" name="emergency_name" value={formData.emergency_name} onChange={handleChange}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500/50"
-                />
-              </div>
+              <Input 
+                label="Emergency Contact Name"
+                type="text" 
+                name="emergency_name" 
+                value={formData.emergency_name} 
+                onChange={handleChange}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-2">Emergency Contact Phone</label>
-                <input 
-                  type="text" name="emergency_phone" value={formData.emergency_phone} onChange={handleChange}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500/50"
-                />
-              </div>
+              <Input 
+                label="Emergency Contact Phone"
+                type="text" 
+                name="emergency_phone" 
+                value={formData.emergency_phone} 
+                onChange={handleChange}
+              />
 
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-2">Alternate Phone (Optional)</label>
-                <input 
-                  type="text" name="emergency_alt_phone" value={formData.emergency_alt_phone} onChange={handleChange}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500/50"
-                />
-              </div>
+              <Input 
+                label="Alternate Phone (Optional)"
+                type="text" 
+                name="emergency_alt_phone" 
+                value={formData.emergency_alt_phone} 
+                onChange={handleChange}
+              />
+
+              <Input 
+                label="Emergency Contact Relation"
+                type="text" 
+                name="emergency_relation" 
+                value={formData.emergency_relation} 
+                onChange={handleChange}
+                placeholder="e.g. Spouse, Parent"
+              />
+
+              <div className="md:col-span-2 mt-4 mb-2 border-t border-border"></div>
+
+              <Input 
+                label="National Health ID"
+                type="text" 
+                name="national_health_id" 
+                value={formData.national_health_id} 
+                onChange={handleChange}
+                className="font-mono"
+              />
+
+              <Input 
+                label="Insurance Provider"
+                type="text" 
+                name="insurance_provider" 
+                value={formData.insurance_provider} 
+                onChange={handleChange}
+              />
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-400 mb-2">Emergency Contact Relation</label>
-                <input 
-                  type="text" name="emergency_relation" value={formData.emergency_relation} onChange={handleChange}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500/50"
-                  placeholder="e.g. Spouse, Parent"
-                />
-              </div>
-
-              <div className="md:col-span-2 mt-4 mb-2 border-t border-slate-800"></div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-2">National Health ID</label>
-                <input 
-                  type="text" name="national_health_id" value={formData.national_health_id} onChange={handleChange}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500/50 font-mono"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-slate-400 mb-2">Insurance Provider</label>
-                <input 
-                  type="text" name="insurance_provider" value={formData.insurance_provider} onChange={handleChange}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500/50"
-                />
-              </div>
-
-              <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-slate-400 mb-2">Insurance Policy Number</label>
-                <input 
-                  type="text" name="insurance_policy_no" value={formData.insurance_policy_no} onChange={handleChange}
-                  className="w-full bg-slate-950 border border-slate-800 rounded-lg px-4 py-2.5 text-slate-200 focus:outline-none focus:border-emerald-500/50 font-mono"
+                <Input 
+                  label="Insurance Policy Number"
+                  type="text" 
+                  name="insurance_policy_no" 
+                  value={formData.insurance_policy_no} 
+                  onChange={handleChange}
+                  className="font-mono"
                 />
               </div>
 
             </div>
           </div>
 
-          <div className="flex justify-end pt-4">
-            <button
-              type="button"
+          <div className="flex justify-end gap-3 pt-4 border-t border-border">
+            <Button
+              variant="outline"
               onClick={() => navigate('/profile')}
               disabled={saving}
-              className="px-6 py-2.5 border border-slate-700 text-slate-300 hover:bg-slate-800 hover:text-white rounded-lg mr-4 transition-colors font-medium disabled:opacity-50"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
+              variant="success"
               type="submit"
               disabled={saving}
-              className="px-6 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg flex items-center font-medium transition-colors disabled:opacity-50 shadow-lg shadow-emerald-500/20"
+              isLoading={saving}
+              iconLeft={Save}
+              className="shadow-lg shadow-success/20"
             >
-              {saving ? (
-                <>
-                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                <>
-                  <Save className="w-5 h-5 mr-2" />
-                  Save Changes
-                </>
-              )}
-            </button>
+              Save Changes
+            </Button>
           </div>
 
         </form>
